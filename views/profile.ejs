@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        header a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .profile-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .profile-container h2 {
+            margin-top: 20px;
+            color: #333;
+        }
+        .profile-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .profile-container ul li {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .profile-container form button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .profile-container form button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/">Новости</a>
+        <a href="/login">Войти</a>
+        <a href="/register">Регистрация</a>
+    </header>
+
+    <h1>Профиль</h1>
+
+    <div class="profile-container">
+        <p>Вы вошли в свою учетную запись.</p>
+        <a href="/auth/logout">Выйти</a>
+
+        <h2>Сохраненные новости</h2>
+
+        <!-- Список сохраненных новостей -->
+        <% if (user.savedNews && user.savedNews.length > 0) { %>
+            <ul>
+                <% user.savedNews.forEach(newsItem => { %>
+                    <li>
+                        <strong><%= newsItem.title %></strong>: <%= newsItem.content %>
+                    </li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <p>У вас нет сохраненных новостей.</p>
+        <% } %>
+
+        <h2>Все новости</h2>
+
+        <!-- Список всех доступных новостей с кнопкой "Сохранить" -->
+        <ul>
+            <% news.forEach(newsItem => { %>
+                <li>
+                    <h3><%= newsItem.title %></h3>
+                    <p><%= newsItem.content %></p>
+                    <% if (user && !user.savedNews.includes(newsItem.id)) { %>
+                        <form action="/news/save/<%= newsItem.id %>" method="POST" style="display:inline;">
+                            <button type="submit">Сохранить в профиль</button>
+                        </form>
+                    <% } else { %>
+                        <p>Вы уже сохранили эту новость.</p>
+                    <% } %>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</body>
+</html>
