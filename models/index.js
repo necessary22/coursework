@@ -4,7 +4,7 @@ const sequelize = require('../db'); // Подключаем Sequelize и баз�
 
 const User = require('./user');
 const News = require('./news');
-const SavedNews = require('./SavedNews');
+const SavedNews = require('./savedNews');
 
 // Экспортируем модели для использования в других файлах
 module.exports = {

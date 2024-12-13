@@ -1,41 +1,91 @@
 const userService = require('../services/userService')
-const News = require('../models').news;
+const { News } = require('../models');
+const User = require('../models/user');
+const SavedNews = require('../models/savedNews');
 
 exports.getProfile = async (req, res) => {
     try {
-        const users = req.user.role === 'admin' ? await userService.getAllUsers() : null
-        return res.render('profile', { user: req.user, users })
-    } catch (err) {
-        return res.status(500).send(`Ошибка загрузки профиля: ${err.message}`)
-    }
-}
-
-exports.deleteUser = async (req, res) => {
-    try {
-        if (req.user.id === parseInt(req.params.userId)) {
-            return res.status(400).send('Нельзя удалить самого себя.')
+        if (!req.user) {
+            throw new Error('Вы не авторизованы.');
         }
-        await userService.deleteUserById(req.params.userId)
-        return res.redirect('/user/profile')
-    } catch (err) {
-        return res.status(500).send(`Ошибка удаления пользователя: ${err.message}`)
-    }
-}
 
-exports.getProfile = async (req, res) => {
-    try {
-        // Найдем все новости пользователя
-        const userNews = await News.findAll({
+        const savedNews = await SavedNews.findAll({
             where: { user_id: req.user.id },
-            include: [{ model: User, as: 'user' }] // Пример включения информации о пользователе, если необходимо
+            include: [
+                {
+                    model: News,
+                    as: 'news',
+                    include: [{ model: User, as: 'user', attributes: ['username'] }],
+                },
+            ],
         });
 
-        // Передаем новости в шаблон
-        return res.render('profile', {
+        res.render('profile', {
             user: req.user,
-            news: userNews // Здесь передаем новости пользователя
+            savedNews,
+            error: null, // Без ошибок
         });
-    } catch (err) {
-        return res.status(500).send(`Ошибка загрузки данных профиля: ${err.message}`);
+    } catch (error) {
+        console.error('Ошибка загрузки профиля:', error);
+        res.render('profile', {
+            user: req.user || null,
+            savedNews: [],
+            error: error.message, // Передаём текст ошибки
+        });
     }
 };
+
+exports.deleteUserById = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const userToDelete = await User.findByPk(userId);
+
+        if (!userToDelete) {
+            throw new Error('Пользователь не найден.');
+        }
+
+        if (userToDelete.role === 'admin') {
+            throw new Error('Нельзя удалить другого администратора.');
+        }
+
+        await userToDelete.destroy();
+        res.redirect('/user/profile');
+    } catch (error) {
+        console.error('Ошибка удаления пользователя:', error);
+        res.render('profile', {
+            user: req.user,
+            savedNews: [],
+            error: error.message,
+        });
+    }
+};
+
+
+exports.changeUserRole = async (req, res) => {
+    try {
+        const { userId, newRole } = req.body;
+
+        if (req.user.role !== 'admin') {
+            throw new Error('У вас нет прав для изменения ролей.');
+        }
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            throw new Error('Пользователь не найден.');
+        }
+
+        user.role = newRole;
+        await user.save();
+
+        res.redirect('/user/profile');
+    } catch (error) {
+        console.error('Ошибка изменения роли:', error);
+        res.render('profile', {
+            user: req.user,
+            savedNews: [],
+            error: error.message,
+        });
+    }
+};
+
+console.log('User model:', User);

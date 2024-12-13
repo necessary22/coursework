@@ -9,107 +9,189 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
+            background-color: #f9f9fb;
+            color: #333;
         }
         header {
             background-color: #333;
             color: white;
-            padding: 10px;
+            padding: 15px;
             text-align: center;
+            font-size: 18px;
         }
         header a {
             color: white;
             margin: 0 10px;
             text-decoration: none;
+            font-weight: bold;
         }
         header a:hover {
             text-decoration: underline;
         }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
         h1 {
             text-align: center;
-            color: #333;
+            color: #444;
+            margin-bottom: 20px;
         }
-        .profile-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
+        .news-item {
+            background-color: #f9f9f9;
             border: 1px solid #ddd;
-            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-        .profile-container h2 {
+        .news-item:hover {
+            background-color: #f1f1f1;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .news-item h3 {
+            margin: 0;
+            color: #007bff;
+        }
+        .news-item h3 a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .news-item h3 a:hover {
+            text-decoration: underline;
+        }
+        .news-item p {
+            margin: 8px 0;
+            color: #666;
+        }
+        .news-item .author {
+            font-weight: bold;
+        }
+        .news-item .date {
+            font-size: 14px;
+            color: #999;
+        }
+        .role-change-form,
+        .delete-user-form {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
             margin-top: 20px;
-            color: #333;
+            border-radius: 8px;
         }
-        .profile-container ul {
-            list-style-type: none;
-            padding: 0;
+        .role-change-form h2,
+        .delete-user-form h2 {
+            color: #444;
         }
-        .profile-container ul li {
-            margin: 10px 0;
-            font-size: 16px;
+        .role-change-form label,
+        .delete-user-form label {
+            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px;
         }
-        .profile-container form button {
-            background-color: #e74c3c;
+        .role-change-form input,
+        .delete-user-form input,
+        .role-change-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #1d1d1d;
             color: white;
             border: none;
-            padding: 5px 10px;
-            cursor: pointer;
             border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
         }
-        .profile-container form button:hover {
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
             background-color: #c0392b;
         }
     </style>
 </head>
 <body>
     <header>
-        <a href="/">Новости</a>
-        <a href="/login">Войти</a>
-        <a href="/register">Регистрация</a>
+        <a href="/">Вернуться на главную</a>
     </header>
 
-    <h1>Профиль</h1>
+    <div class="container">
+        <h1>Профиль</h1>
+        <p>Вы вошли в свою учетную запись под ролью <strong><%= user.role === 'admin' ? 'администратора' : 'пользователя' %></strong>. 
+            <a href="/auth/logout">Выйти</a>
+        </p>
 
-    <div class="profile-container">
-        <p>Вы вошли в свою учетную запись.</p>
-        <a href="/auth/logout">Выйти</a>
-
-        <h2>Сохраненные новости</h2>
-
-        <!-- Список сохраненных новостей -->
-        <% if (user.savedNews && user.savedNews.length > 0) { %>
-            <ul>
-                <% user.savedNews.forEach(newsItem => { %>
-                    <li>
-                        <strong><%= newsItem.title %></strong>: <%= newsItem.content %>
-                    </li>
-                <% }) %>
-            </ul>
+        <h2>Сохранённые новости</h2>
+        <% if (savedNews && savedNews.length === 0) { %>
+            <p>У вас нет сохранённых новостей.</p>
         <% } else { %>
-            <p>У вас нет сохраненных новостей.</p>
+            <% savedNews.forEach(item => { %>
+                <% if (item.news) { %>
+                    <div class="news-item">
+                        <h3><a href="/news/<%= item.news.id %>"><%= item.news.title %></a></h3>
+                        <p class="author">Автор: <%= item.news.user.username %></p>
+                        <p class="date">Опубликовано: <%= item.news.createdAt.toLocaleString() %></p>
+                    </div>
+                <% } else { %>
+                    <p>Новость недоступна.</p>
+                <% } %>
+            <% }) %>
         <% } %>
 
-        <h2>Все новости</h2>
+        <% if (user.role === 'admin') { %>
+            <div class="role-change-form">
+                <h2>Изменить роль пользователя</h2>
+                <form action="/user/change-role" method="POST">
+                    <label for="userId">ID пользователя:</label>
+                    <input type="number" id="userId" name="userId" placeholder="Введите ID пользователя" required>
 
-        <!-- Список всех доступных новостей с кнопкой "Сохранить" -->
-        <ul>
-            <% news.forEach(newsItem => { %>
-                <li>
-                    <h3><%= newsItem.title %></h3>
-                    <p><%= newsItem.content %></p>
-                    <% if (user && !user.savedNews.includes(newsItem.id)) { %>
-                        <form action="/news/save/<%= newsItem.id %>" method="POST" style="display:inline;">
-                            <button type="submit">Сохранить в профиль</button>
-                        </form>
-                    <% } else { %>
-                        <p>Вы уже сохранили эту новость.</p>
-                    <% } %>
-                </li>
-            <% }) %>
-        </ul>
+                    <label for="newRole">Новая роль:</label>
+                    <select id="newRole" name="newRole" required>
+                        <option value="user">Пользователь</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+
+                    <button class="btn" type="submit">Изменить роль</button>
+                </form>
+            </div>
+
+            <div class="delete-user-form">
+                <h2>Удалить пользователя</h2>
+                <form action="/user/delete-user" method="POST">
+                    <label for="deleteUserId">ID пользователя:</label>
+                    <input type="number" id="deleteUserId" name="userId" placeholder="Введите ID пользователя" required>
+
+                    <button class="btn btn-danger" type="submit">Удалить пользователя</button>
+                </form>
+            </div>
+        <% } %>
+
+        <div id="error-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000; text-align: center;">
+            <h2 style="color: red;">Ошибка</h2>
+            <p id="error-message"></p>
+            <button onclick="document.getElementById('error-popup').style.display='none';" style="background-color: #333; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer;">Закрыть</button>
+        </div>
+        
+        <script>
+            <% if (typeof error !== 'undefined' && error) { %>
+                document.getElementById('error-popup').style.display = 'block';
+                document.getElementById('error-message').textContent = '<%= error %>';
+            <% } %>
+        </script>
     </div>
 </body>
 </html>

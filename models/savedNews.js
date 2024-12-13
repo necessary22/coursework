@@ -1,20 +1,22 @@
-// models/SavedNews.js
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../db'); // Подключаем sequelize из файла db.js
+const sequelize = require('../db');
+const User = require('./user');
+const News = require('./news');
 
-// Здесь можно определить вашу модель
 const SavedNews = sequelize.define('SavedNews', {
-  // Пример полей
-  newsId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  // Другие поля, которые вам нужны
+    user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    news_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+}, {
+    timestamps: true,
 });
 
-// Экспортируем модель
+
+SavedNews.belongsTo(News, { foreignKey: 'news_id', as: 'news' });
+SavedNews.belongsTo(News, { foreignKey: 'news_id', onDelete: 'CASCADE' });
 module.exports = SavedNews;

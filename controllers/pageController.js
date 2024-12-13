@@ -1,6 +1,6 @@
 const newsService = require('../services/newsService')
 const User = require('../models/user')
-
+const SavedNews = require('../models/savedNews');
 exports.renderHomePage = async (req, res) => {
     try {
         const news = await newsService.getAllnews()

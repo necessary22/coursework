@@ -2,22 +2,29 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../db');
 const User = require('./user');
 
-const news = sequelize.define('news', {
-    content: DataTypes.STRING,
+const News = sequelize.define('News', {
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false, 
+    },
+    content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    },
     createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW, 
     },
-    user_id: DataTypes.INTEGER, // Этот ключ связан с пользователем
+    user_id: {
+        type: DataTypes.INTEGER, 
+        allowNull: false,
+    },
 });
 
-// Метод для форматирования даты
-news.prototype.formattedDate = function () {
+News.prototype.formattedDate = function () {
     return this.createdAt.toLocaleString();
 };
+News.belongsTo(User, { as: 'user', foreignKey: 'user_id', onDelete: 'CASCADE' });
 
-// Связь с моделью User
-news.belongsTo(User, { as: 'user', foreignKey: 'user_id', onDelete: 'CASCADE' });
-
-module.exports = news;
+module.exports = News;
