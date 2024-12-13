@@ -23,14 +23,14 @@ exports.getProfile = async (req, res) => {
         res.render('profile', {
             user: req.user,
             savedNews,
-            error: null, // Без ошибок
+            error: null, 
         });
     } catch (error) {
         console.error('Ошибка загрузки профиля:', error);
         res.render('profile', {
             user: req.user || null,
             savedNews: [],
-            error: error.message, // Передаём текст ошибки
+            error: error.message,
         });
     }
 };
